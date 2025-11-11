@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Github, Linkedin, Mail, ArrowRight, ExternalLink, Code2, Sun, MoonStar } from "lucide-react";
+import { Github, Linkedin, Mail, ArrowRight, ExternalLink, Code2, Sun, MoonStar, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -208,12 +208,56 @@ function ProjectCard({ p, i }) {
 
 function ProjectsWidget() {
   const { projects, loading } = useProjects();
+  const [layout, setLayout] = React.useState(() => {
+    try {
+      return localStorage.getItem("projectsLayout") || "carousel";
+    } catch (_) {
+      return "carousel";
+    }
+  });
+  React.useEffect(() => {
+    try { localStorage.setItem("projectsLayout", layout); } catch {}
+  }, [layout]);
   return (
     <section id="projects" className="max-w-6xl mx-auto px-4 py-14 relative z-30">
       <div className="pointer-events-none absolute -z-10 -top-10 right-0 h-56 w-56 rounded-full blur-3xl opacity-30 bg-[radial-gradient(14rem_10rem_at_50%_50%,rgba(255,184,0,0.16),transparent)]" />
       <div className="flex items-end justify-between pb-6">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Recent Projects</h2>
-        <a href={PROFILE.github} className="text-sm opacity-70 hover:opacity-100">View all on GitHub →</a>
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-1 rounded-full border border-black/10 dark:border-white/15 bg-white/70 dark:bg-neutral-900/60 p-1">
+            <button
+              type="button"
+              onClick={() => setLayout("carousel")}
+              className={[
+                "h-8 px-3 rounded-full text-sm flex items-center gap-2",
+                layout === "carousel"
+                  ? "bg-black text-white dark:bg-white dark:text-black"
+                  : "hover:bg-black/5 dark:hover:bg-white/10"
+              ].join(" ")}
+              aria-pressed={layout === "carousel"}
+              aria-label="Show as slider"
+            >
+              <span className="inline-flex"><LayoutGrid className="h-4 w-4" /></span>
+              <span className="hidden lg:inline">Slider</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setLayout("list")}
+              className={[
+                "h-8 px-3 rounded-full text-sm flex items-center gap-2",
+                layout === "list"
+                  ? "bg-black text-white dark:bg-white dark:text-black"
+                  : "hover:bg-black/5 dark:hover:bg-white/10"
+              ].join(" ")}
+              aria-pressed={layout === "list"}
+              aria-label="Show as list"
+            >
+              <span className="inline-flex"><List className="h-4 w-4" /></span>
+              <span className="hidden lg:inline">List</span>
+            </button>
+          </div>
+          <a href={PROFILE.github} className="text-sm opacity-70 hover:opacity-100">View all on GitHub →</a>
+        </div>
       </div>
       {loading ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -223,19 +267,27 @@ function ProjectsWidget() {
         </div>
       ) : (
         <>
-          <div className="md:hidden grid grid-cols-1 gap-6">
-            {projects.map((p, i) => <ProjectCard key={`${p.title}-${i}`} p={p} i={i} />)}
-          </div>
-          <div className="hidden md:block">
-            <SpiralCarousel
-              items={projects}
-              renderItem={(p, i) => (
-                <div className="w-[320px]">
-                  <ProjectCard p={p} i={i} />
-                </div>
-              )}
-            />
-          </div>
+          {layout === "list" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((p, i) => <ProjectCard key={`${p.title}-${i}`} p={p} i={i} />)}
+            </div>
+          ) : (
+            <>
+              <div className="md:hidden grid grid-cols-1 gap-6">
+                {projects.map((p, i) => <ProjectCard key={`${p.title}-${i}`} p={p} i={i} />)}
+              </div>
+              <div className="hidden md:block">
+                <SpiralCarousel
+                  items={projects}
+                  renderItem={(p, i) => (
+                    <div className="w-[320px]">
+                      <ProjectCard p={p} i={i} />
+                    </div>
+                  )}
+                />
+              </div>
+            </>
+          )}
         </>
       )}
     </section>
