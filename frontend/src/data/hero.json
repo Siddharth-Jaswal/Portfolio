@@ -1,0 +1,10 @@
+{
+  "badge": "Available for internships",
+  "title": "Building calm, delightful software",
+  "subtitle": "I craft fast UIs, scalable APIs, and practical ML features — with an eye for detail and a preference for simplicity.",
+  "primaryCta": { "label": "View Projects", "href": "#projects" },
+  "secondaryCta": { "label": "Contact", "href": "mailto:{email}" },
+  "showPreview": false,
+  "previewImage": "/images/hero.jpg",
+  "previewText": "Landing preview area — hero screenshot or product montage"
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "title": "LifeAura AI",
+    "desc": "MERN health companion with prescription OCR, symptom prediction, and Telegram reminders.",
+    "tags": [
+      "React",
+      "Vite",
+      "Redux Toolkit",
+      "Tailwind",
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "Flask"
+    ],
+    "image": "https://opengraph.githubassets.com/1/Siddharth-Jaswal/ucs503p-202526odd-sankalp",
+    "featured": true,
+    "date": "2025-11-09",
+    "links": {
+      "repo": "https://github.com/Siddharth-Jaswal/ucs503p-202526odd-sankalp",
+      "demo": "https://life-aura.vercel.app"
+    }
+  }
+]

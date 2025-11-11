@@ -1,0 +1,32 @@
+[
+  {
+    "category": "Frontend",
+    "items": [
+      { "name": "React", "icon": "react" },
+      { "name": "Html", "icon": "html" },
+      { "name": "Css", "icon": "css"},
+      { "name": "JS", "icon": "js"}
+    ]
+  },
+  {
+    "category": "Backend",
+    "items": [
+      { "name": "Node.js", "icon": "node" },
+      { "name": "Express.js", "icon": "express" },
+      { "name": "Flask", "icon": "flask" }
+    ]
+  },
+  {
+    "category": "Databases",
+    "items": [
+      { "name": "MongoDB", "icon": "mongo" }
+    ]
+  },
+  {
+    "category": "Tools",
+    "items": [
+      { "name": "Git & GitHub", "icon": "git" },
+      { "name": "Postman", "icon": "postman" }
+    ]
+  }
+]
