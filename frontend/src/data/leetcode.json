@@ -1,0 +1,16 @@
+{
+  "username": "your_leetcode_username",
+  "profileUrl": "https://leetcode.com/your_leetcode_username/",
+  "rank": "Knight",
+  "contestRating": 1800,
+  "totalSolved": 450,
+  "totalQuestions": 3000,
+  "acceptanceRate": 42.3,
+  "solved": {
+    "easy": 180,
+    "medium": 230,
+    "hard": 40
+  },
+  "badges": ["Top 5% Spring 2024", "100 Days Streak"]
+}
+
