@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Github, Linkedin, Mail, ArrowRight, ExternalLink, Code2, Sun, MoonStar, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,11 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { loadProjects } from "@/lib/projects";
 import { loadProfile } from "@/lib/profile";
 import { loadHero } from "@/lib/hero";
-import SpiralCarousel from "@/components/SpiralCarousel";
+import RailCarousel from "@/components/RailCarousel";
+import MagneticButton from "@/components/ui/MagneticButton";
 import Skills from "@/components/Skills";
+import CodingProfile from "@/components/CodingProfile";
 import AnimatedCoder from "@/components/AnimatedCoder";
 import AnimatedProjectPlaceholder from "@/components/AnimatedProjectPlaceholder";
 import ImageProject from "@/components/ImageProject";
+import ClickFX from "@/components/ClickFX";
+import ContactSlideOver from "@/components/ContactSlideOver";
 
 /**
  * Apple‑style Portfolio Landing (React + Tailwind + Framer Motion)
@@ -92,10 +96,31 @@ function BrandNav() {
 
 function Hero() {
   const HERO = loadHero();
+  const ref = React.useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const ySlow = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const yMed = useTransform(scrollYProgress, [0, 1], [0, -80]);
+  const yFast = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const [spot, setSpot] = React.useState({ x: 0, y: 0, show: false });
+  const onMouseMove = (e) => {
+    const r = ref.current?.getBoundingClientRect?.();
+    if (!r) return;
+    setSpot({ x: e.clientX - r.left, y: e.clientY - r.top, show: true });
+  };
+  const onMouseLeave = () => setSpot((s) => ({ ...s, show: false }));
   return (
-    <section id="home" className="relative overflow-hidden">
+    <section id="home" className="relative overflow-hidden" ref={ref} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(255,200,0,0.06),transparent_60%)]" />
-      <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-72 w-[42rem] rounded-full blur-3xl opacity-40 bg-[radial-gradient(30rem_12rem_at_50%_50%,rgba(255,184,0,0.16),transparent)] animate-glow" />
+      <motion.div style={{ y: ySlow }} className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-72 w-[42rem] rounded-full blur-3xl opacity-40 bg-[radial-gradient(30rem_12rem_at_50%_50%,rgba(255,184,0,0.16),transparent)]" />
+      <motion.div style={{ y: yMed }} className="pointer-events-none absolute -top-10 right-10 h-40 w-40 rounded-full blur-2xl opacity-30 bg-[radial-gradient(12rem_12rem_at_50%_50%,rgba(255,220,120,0.18),transparent)]" />
+      <motion.div style={{ y: yFast }} className="pointer-events-none absolute top-32 left-16 h-32 w-56 rounded-full blur-2xl opacity-30 bg-[radial-gradient(16rem_10rem_at_50%_50%,rgba(255,170,0,0.16),transparent)]" />
+      <div
+        className="pointer-events-none absolute inset-0 transition-opacity duration-300"
+        style={{
+          opacity: spot.show ? 1 : 0,
+          background: `radial-gradient(180px 140px at ${Math.round(spot.x)}px ${Math.round(spot.y)}px, rgba(255, 214, 0, 0.16), transparent 60%)`
+        }}
+      />
       <div className="max-w-6xl mx-auto px-4 pt-16 pb-10">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="flex flex-col items-center text-center gap-6">
           {HERO.badge && (
@@ -106,12 +131,16 @@ function Hero() {
             <p className="max-w-2xl text-base md:text-lg text-neutral-600 dark:text-neutral-300">{HERO.subtitle}</p>
           )}
           <div className="flex flex-wrap items-center gap-3">
-            <Button variant="gold" asChild className="px-6"><a href={HERO.primaryCta.href} className="flex items-center gap-2">{HERO.primaryCta.label} <ArrowRight className="h-4 w-4" /></a></Button>
-            <Button variant="secondary" asChild className="px-6">
-              <a href={(HERO.secondaryCta.href || '').replace('{email}', PROFILE.email) || `mailto:${PROFILE.email}`} className="flex items-center gap-2">
-                <Mail className="h-4 w-4" /> {HERO.secondaryCta.label}
+            <MagneticButton variant="gold" asChild className="px-6">
+              <a href={HERO.primaryCta.href} className="flex items-center gap-2 group">
+                {HERO.primaryCta.label} <motion.span whileHover={{ x: 4 }} className="inline-flex"><ArrowRight className="h-4 w-4" /></motion.span>
               </a>
-            </Button>
+            </MagneticButton>
+            <MagneticButton variant="secondary" asChild className="px-6">
+              <a href={(HERO.secondaryCta.href || '').replace('{email}', PROFILE.email) || `mailto:${PROFILE.email}`} className="flex items-center gap-2 group">
+                <motion.span whileHover={{ rotate: 10 }} className="inline-flex"><Mail className="h-4 w-4" /></motion.span> {HERO.secondaryCta.label}
+              </a>
+            </MagneticButton>
           </div>
           <div className="flex items-center gap-4 pt-2 opacity-80">
             <a href={PROFILE.github} aria-label="GitHub" className="hover:opacity-100"><Github className="h-5 w-5" /></a>
@@ -146,11 +175,26 @@ function Hero() {
 }
 
 function ProjectCard({ p, i }) {
+  const wrapRef = React.useRef(null);
+  const [tilt, setTilt] = React.useState({ rx: 0, ry: 0, s: 1 });
+  const onMove = (e) => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    const ry = (x - 0.5) * 10;
+    const rx = -(y - 0.5) * 8;
+    setTilt({ rx, ry, s: 1.01 });
+  };
+  const onLeave = () => setTilt({ rx: 0, ry: 0, s: 1 });
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.04 * i }}>
-      <Card className="border-black/5 dark:border-white/10 bg-white/70 dark:bg-neutral-900/50 supports-[backdrop-filter]:backdrop-blur-xl transition-all hover:shadow-[0_24px_60px_-30px_rgba(0,0,0,0.35)] overflow-hidden">
-        <ImageProject src={p.image} alt={p.title || "Project"} />
-        <CardContent className="pt-4">
+      <div ref={wrapRef} onMouseMove={onMove} onMouseLeave={onLeave} className="group relative" style={{ perspective: 1000 }}>
+        <motion.div style={{ rotateX: tilt.rx, rotateY: tilt.ry, scale: tilt.s, transformStyle: "preserve-3d" }} transition={{ type: "spring", stiffness: 260, damping: 18, mass: 0.6 }}>
+          <Card className="border-black/5 dark:border-white/10 bg-white/70 dark:bg-neutral-900/50 supports-[backdrop-filter]:backdrop-blur-xl transition-all hover:shadow-[0_24px_60px_-30px_rgba(0,0,0,0.35)] overflow-hidden">
+            <ImageProject src={p.image} alt={p.title || "Project"} />
+            <CardContent className="pt-4">
           <div className="flex items-center justify-between pb-2">
             <h3 className="text-base md:text-lg font-semibold tracking-tight">{p.title}</h3>
           </div>
@@ -162,7 +206,7 @@ function ProjectCard({ p, i }) {
           </div>
           <div className="flex items-center gap-3">
             {p.repo && (
-              <Button asChild size="sm" variant="outline" className="gap-2">
+              <MagneticButton asChild size="sm" variant="outline" className="gap-2">
                 <a
                   href={p.repo}
                   target="_blank"
@@ -176,12 +220,12 @@ function ProjectCard({ p, i }) {
                   onTouchEnd={(e) => e.stopPropagation()}
                   style={{ pointerEvents: "auto" }}
                 >
-                  <Code2 className="h-4 w-4" /> Code
+                  <motion.span whileHover={{ rotate: -10 }} className="inline-flex"><Code2 className="h-4 w-4" /></motion.span> Code
                 </a>
-              </Button>
+              </MagneticButton>
             )}
             {p.demo && (
-              <Button asChild size="sm" className="gap-2">
+              <MagneticButton asChild size="sm" className="gap-2">
                 <a
                   href={p.demo}
                   target="_blank"
@@ -195,13 +239,16 @@ function ProjectCard({ p, i }) {
                   onTouchEnd={(e) => e.stopPropagation()}
                   style={{ pointerEvents: "auto" }}
                 >
-                  <ExternalLink className="h-4 w-4" /> Demo
+                  <motion.span whileHover={{ x: 3 }} className="inline-flex"><ExternalLink className="h-4 w-4" /></motion.span> Demo
                 </a>
-              </Button>
+              </MagneticButton>
             )}
           </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div aria-hidden className="pointer-events-none absolute -inset-6 rounded-[30px] bg-[radial-gradient(200px_140px_at_50%_30%,rgba(255,200,0,0.14),transparent)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </div>
     </motion.div>
   );
 }
@@ -277,7 +324,7 @@ function ProjectsWidget() {
                 {projects.map((p, i) => <ProjectCard key={`${p.title}-${i}`} p={p} i={i} />)}
               </div>
               <div className="hidden md:block">
-                <SpiralCarousel
+                <RailCarousel
                   items={projects}
                   renderItem={(p, i) => (
                     <div className="w-[320px]">
@@ -295,20 +342,28 @@ function ProjectsWidget() {
 }
 
 function Footer() {
+  const [open, setOpen] = React.useState(false);
+  const email = loadProfile().email;
   return (
     <footer id="contact" className="max-w-6xl mx-auto px-4 py-10 text-sm">
       <div className="rounded-3xl border border-black/5 dark:border-white/10 bg-white/70 dark:bg-neutral-900/50 supports-[backdrop-filter]:backdrop-blur-xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h3 className="font-medium">Let’s build something together</h3>
           <p className="text-neutral-600 dark:text-neutral-300">I’m open to internships and interesting collaborations.</p>
+          <div className="pt-2 flex flex-wrap gap-2 opacity-90">
+            {['Web App', 'ML/AI', 'UI/UX', 'API/Backend'].map((t) => (
+              <span key={t} className="px-3 py-1 rounded-full text-xs border border-black/10 dark:border-white/15 bg-white/60 dark:bg-neutral-900/50">{t}</span>
+            ))}
+          </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button asChild variant="secondary"><a href={`mailto:${PROFILE.email}`} className="flex items-center gap-2"><Mail className="h-4 w-4" /> {PROFILE.email}</a></Button>
+          <Button onClick={() => setOpen(true)} className="gap-2"><Mail className="h-4 w-4" /> Let’s Talk</Button>
           <Button asChild variant="outline"><a href={PROFILE.github} className="flex items-center gap-2"><Github className="h-4 w-4" /> GitHub</a></Button>
           <Button asChild variant="outline"><a href={PROFILE.linkedin} className="flex items-center gap-2"><Linkedin className="h-4 w-4" /> LinkedIn</a></Button>
         </div>
       </div>
       <div className="text-xs text-neutral-500 dark:text-neutral-400 pt-6">© {new Date().getFullYear()} {PROFILE.name}</div>
+      <ContactSlideOver open={open} onClose={() => setOpen(false)} email={email} github={PROFILE.github} linkedin={PROFILE.linkedin} />
     </footer>
   );
 }
@@ -316,9 +371,11 @@ function Footer() {
 export default function App() {
   return (
     <div className="min-h-screen bg-white text-neutral-900 dark:bg-neutral-950 dark:text-white antialiased selection:bg-black/80 selection:text-white">
+      <ClickFX />
       <BrandNav />
       <Hero />
       <Skills />
+      <CodingProfile />
       <ProjectsWidget />
       <Footer />
     </div>
